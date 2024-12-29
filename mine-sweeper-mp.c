@@ -57,6 +57,7 @@ int pointCheck(int fieldy, int fieldx, fieldStruct *f, int gameH, int gameW) {
 }
 
 void writeNumber(int fieldy, int fieldx, fieldStruct *f, int gameH, int gameW, int starty, int startx, int p) {
+    gameW=gameW; //only to stop compiler error;
     f[(fieldy)*gameH + fieldx].opened = 1;
     char num[5];
     sprintf(num, "%d", p);

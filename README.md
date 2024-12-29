@@ -5,11 +5,12 @@ Based on ncurses.\
 Have fun.
 
 ## How to use?
-* git clone https://github.com/palmar125/mine-sweeper-mp.git
-* cd mine-sweeper-mp
-* make 
-* ./mine-sweeper-mp
-
+```
+git clone https://github.com/palmar125/mine-sweeper-mp.git
+cd mine-sweeper-mp
+make 
+./mine-sweeper-mp
+```
 ## Problems
 If you see sth like this:
 ```
