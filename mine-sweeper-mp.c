@@ -95,11 +95,13 @@ int chordOpen(int fieldy, int fieldx, fieldStruct *f, int gameH, int gameW, int 
                         writeNumber(fieldy + y, fieldx + x, f, gameW, gameH, starty, startx, p);
                     else {
                         // no bombs around
-                        f[fieldy * gameW + fieldx].opened = 1;
+                        f[fieldy+y * gameW + fieldx+x].opened = 1;
                         attrset(COLOR_PAIR(1));
                         mvwaddch(stdscr, fieldy+y + starty, ((fieldx+x) * 2) + startx, '.');
                         attrset(A_NORMAL);
                         wrefresh(stdscr);
+                        //open wider
+                        openField(fieldy + y, fieldx + x, f, gameH, gameW, starty, startx);
                     }
                 }
             }
@@ -298,6 +300,14 @@ void showEndResult(WINDOW *winResult, WINDOW *winStatus, fieldStruct *field, pth
     delwin(winResult);
     delwin(w);
 }
+void showStatus(WINDOW *winStatus, int fieldy, int fieldx, fieldStruct *field, int gameH, int gameW, int move) {
+        mvwprintw(winStatus, 0, 1, "FLAGS: %d  ", flagCount(field, gameH, gameW));
+        mvwprintw(winStatus, 1, 1, "M: %d, O: %d ", move, openedCount(field, gameH, gameW));
+        mvwprintw(winStatus, 2, 1, "Y: %d, X: %d  ", fieldy, fieldx);
+        mvwprintw(winStatus, 3, 1, "Time: %d", clockTime);
+        wrefresh(winStatus);
+        wrefresh(stdscr);
+}
 
 int minePlay(int gameH, int gameW, int bombCount) {
     int bombDrawVar = 0;
@@ -401,6 +411,7 @@ int minePlay(int gameH, int gameW, int bombCount) {
                     wmove(stdscr, getcury(stdscr), getcurx(stdscr) - 1);
                     if (checkResult(field, gameH, gameW, bombCount) == 1) {
                         curs_set(0);
+                        showStatus(winStatus, fieldy, fieldx, field,  gameH,  gameW, move);
                         showEndResult(winResult, winStatus, field, clockPtr, 1);
                         return (1);
                     }
@@ -429,6 +440,7 @@ int minePlay(int gameH, int gameW, int bombCount) {
                         wmove(stdscr, starty + fieldy, startx + fieldx * 2);
                         if (checkResult(field, gameH, gameW, bombCount) == 1) {
                             curs_set(0);
+                            showStatus(winStatus, fieldy, fieldx, field,  gameH,  gameW, move);
                             showEndResult(winResult, winStatus, field, clockPtr, 1);
 
                             return (1);
@@ -437,6 +449,7 @@ int minePlay(int gameH, int gameW, int bombCount) {
                         showBombs(field, gameH, gameW, starty, startx);
                         wmove(stdscr, starty + fieldy, startx + fieldx * 2);
                         // You pressed a mine
+                        showStatus(winStatus, fieldy, fieldx, field,  gameH,  gameW, move);
                         showEndResult(winResult, winStatus, field, clockPtr, 0);
 
                         return (-1);
@@ -458,12 +471,9 @@ int minePlay(int gameH, int gameW, int bombCount) {
             default:
                 break;
         }
-        mvwprintw(winStatus, 0, 1, "FLAGS: %d  ", flagCount(field, gameH, gameW));
-        mvwprintw(winStatus, 1, 1, "MOVE: %d  ", move);
-        mvwprintw(winStatus, 2, 1, "Y: %d, X: %d  ", fieldy, fieldx);
-        mvwprintw(winStatus, 3, 1, "Time: %d", clockTime);
-        wrefresh(winStatus);
-        wrefresh(stdscr);
+        
+        showStatus(winStatus, fieldy, fieldx, field,  gameH,  gameW, move);
+
     }
     return 0;
 }
