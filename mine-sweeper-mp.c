@@ -454,7 +454,7 @@ int selectGame()
         switch (ch)
         {
         case '1':
-            minePlay(9, 9, 3);
+            minePlay(9, 9, 10);
             break;
         case '2':
             minePlay(16, 16, 40);
