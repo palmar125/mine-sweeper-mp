@@ -12,6 +12,10 @@ typedef struct
     int opened;
 } fieldStruct;
 
+//function to open tiles
+int openField(int fieldy, int fieldx, fieldStruct *f, int gameH, int gameW, int starty, int startx);
+
+
 // ASCI art from:
 // https://patorjk.com/software/taag/#p=display&h=1&v=1&f=Modular&t=%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20MINE%0ASWEEPER%0A%0A
 void logoPrint() {
@@ -55,6 +59,7 @@ int pointCheck(int fieldy, int fieldx, fieldStruct *f, int gameH, int gameW) {
     }
     return bCount;
 }
+
 
 void writeNumber(int fieldy, int fieldx, fieldStruct *f, int gameH, int gameW, int starty, int startx, int p) {
     gameW=gameW; //only to stop compiler error;
@@ -166,13 +171,9 @@ void bombDraw(int fieldy, int fieldx, fieldStruct *f, int gameH, int gameW,
         while ((b = getRandomNumer(0, ((gameH) * (gameW)-1))) == (fieldy * gameW + fieldx) || (f[b].bomb == 1)) {
         }
         f[b].bomb = 1;
-        // mvwprintw(stdscr, 3, 2, "y: %d, x: %d", b/gameH, b%gameH);
-        // wrefresh(stdscr);
-        // getch();
     }
 }
 
-// testfunction
 void showBombs(fieldStruct *f, int gameH, int gameW, int starty, int startx) {
     attrset(COLOR_PAIR(3) | A_BOLD);
     for (int i = 0; i < gameH; i++) {
@@ -301,8 +302,8 @@ void showEndResult(WINDOW *winResult, WINDOW *winStatus, fieldStruct *field, pth
     delwin(w);
 }
 void showStatus(WINDOW *winStatus, int fieldy, int fieldx, fieldStruct *field, int gameH, int gameW, int move) {
-        mvwprintw(winStatus, 0, 1, "FLAGS: %d  ", flagCount(field, gameH, gameW));
-        mvwprintw(winStatus, 1, 1, "M: %d, O: %d ", move, openedCount(field, gameH, gameW));
+        mvwprintw(winStatus, 0, 1, "F: %d, O: %d", flagCount(field, gameH, gameW), openedCount(field, gameH, gameW));
+        mvwprintw(winStatus, 1, 1, "M: %d", move);
         mvwprintw(winStatus, 2, 1, "Y: %d, X: %d  ", fieldy, fieldx);
         mvwprintw(winStatus, 3, 1, "Time: %d", clockTime);
         wrefresh(winStatus);
