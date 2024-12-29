@@ -56,16 +56,77 @@ int pointCheck(int fieldy, int fieldx, fieldStruct *f, int gameH, int gameW) {
     return bCount;
 }
 
+void writeNumber(int fieldy, int fieldx, fieldStruct *f, int gameH, int gameW, int starty, int startx, int p) {
+    f[(fieldy)*gameH + fieldx].opened = 1;
+    char num[5];
+    sprintf(num, "%d", p);
+    attrset(COLOR_PAIR(9 + p));
+    mvwaddch(stdscr, fieldy + starty, (fieldx * 2) + startx, num[0]);
+    attrset(A_NORMAL);
+    wrefresh(stdscr);
+    return;
+}
+
+int chordOpen(int fieldy, int fieldx, fieldStruct *f, int gameH, int gameW, int starty, int startx) {
+    int y, x;
+
+    // at first step check flags & bombs
+    for (int i = 0; i < 9; i++) {
+        if (i != 4) { /*omit checked point*/
+            y = i / 3 - 1;
+            x = i % 3 - 1;
+            if (fieldy + y < gameH && fieldy + y >= 0 && fieldx + x >= 0 && fieldx + x < gameW) {
+                if (f[(fieldy + y) * gameH + fieldx + x].flag != 1 && f[(fieldy + y) * gameH + fieldx + x].bomb == 1)  // flag was in incorrect place
+                    return -1;
+            }
+        }
+    }
+    // second, open now
+    int p;
+    for (int i = 0; i < 9; i++) {
+        if (i != 4) { /*omit checked point*/
+            y = i / 3 - 1;
+            x = i % 3 - 1;
+            if (fieldy + y < gameH && fieldy + y >= 0 && fieldx + x >= 0 && fieldx + x < gameW) {
+                p = pointCheck(fieldy + y, fieldx + x, f, gameH, gameW);
+                if (f[(fieldy + y) * gameH + fieldx + x].flag != 1 && f[(fieldy + y) * gameH + fieldx + x].opened != 1) {
+                    if (p > 0)
+                        writeNumber(fieldy + y, fieldx + x, f, gameW, gameH, starty, startx, p);
+                    else {
+                        // no bombs around
+                        f[fieldy * gameW + fieldx].opened = 1;
+                        attrset(COLOR_PAIR(1));
+                        mvwaddch(stdscr, fieldy+y + starty, ((fieldx+x) * 2) + startx, '.');
+                        attrset(A_NORMAL);
+                        wrefresh(stdscr);
+                    }
+                }
+            }
+        }
+    }
+    return 1;
+}
+
 int openField(int fieldy, int fieldx, fieldStruct *f, int gameH, int gameW, int starty, int startx) {
     int p = 0;
     int x = 0, y = 0;
 
+    // you press a bomb
     if (f[fieldy * gameW + fieldx].bomb == 1) {
         mvwaddch(stdscr, fieldy + starty, (fieldx * 2) + startx, 'B');
         f[fieldy * gameW + fieldx].opened = 1;
         wrefresh(stdscr);
         return -1;
     }
+
+    // chord
+    // int chord;
+    if (f[fieldy * gameW + fieldx].opened == 1) {
+        if (chordOpen(fieldy, fieldx, f, gameH, gameW, starty, startx) == -1)
+            return -1;
+    }
+
+    // check possibility to open around
     if ((p = pointCheck(fieldy, fieldx, f, gameH, gameW)) == 0) {
         f[fieldy * gameW + fieldx].opened = 1;
         attrset(COLOR_PAIR(1));
@@ -83,13 +144,8 @@ int openField(int fieldy, int fieldx, fieldStruct *f, int gameH, int gameW, int 
             }
         }
     } else {
-        f[fieldy * gameW + fieldx].opened = 1;
-        char num[5];
-        sprintf(num, "%d", p);
-        attrset(COLOR_PAIR(9 + p));
-        mvwaddch(stdscr, fieldy + starty, (fieldx * 2) + startx, num[0]);
-        attrset(A_NORMAL);
-        wrefresh(stdscr);
+        // f[fieldy * gameW + fieldx].opened = 1;
+        writeNumber(fieldy, fieldx, f, gameW, gameH, starty, startx, p);
         return p;
     }
     return 0;
