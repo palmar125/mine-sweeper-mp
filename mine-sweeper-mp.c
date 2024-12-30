@@ -91,24 +91,9 @@ int chordOpen(int fieldy, int fieldx, fieldStruct *f, int gameH, int gameW, int 
         if (i != 4) { /*omit checked point*/
             y = i / 3 - 1;
             x = i % 3 - 1;
-            if (fieldy + y < gameH && fieldy + y >= 0 && fieldx + x >= 0 && fieldx + x < gameW) {                
+            if (fieldy + y < gameH && fieldy + y >= 0 && fieldx + x >= 0 && fieldx + x < gameW) {
                 if (f[(fieldy + y) * gameH + fieldx + x].flag != 1 && f[(fieldy + y) * gameH + fieldx + x].opened != 1) {
-                    // that check is not nessesery. openField do the same
-                    // p = pointCheck(fieldy + y, fieldx + x, f, gameH, gameW);
-                    // if (p > 0)
-                    //     writeNumber(fieldy + y, fieldx + x, f, gameW, gameH, starty, startx, p);
-                    // else 
-                    { //remove after test
-                        // no bombs around
-                        // that code is not needed, because openField do the same
-                        // f[fieldy + y * gameW + fieldx + x].opened = 1;
-                        // attrset(COLOR_PAIR(1));
-                        // mvwaddch(stdscr, fieldy + y + starty, ((fieldx + x) * 2) + startx, '.');
-                        // attrset(A_NORMAL);
-                        // wrefresh(stdscr);
-                        // open wider
-                        openField(fieldy + y, fieldx + x, f, gameH, gameW, starty, startx);
-                    } //remove after test
+                    openField(fieldy + y, fieldx + x, f, gameH, gameW, starty, startx);
                 }
             }
         }
@@ -122,9 +107,9 @@ int openField(int fieldy, int fieldx, fieldStruct *f, int gameH, int gameW, int 
 
     // you press a bomb
     if (f[fieldy * gameW + fieldx].bomb == 1) {
-        //mvwaddch(stdscr, fieldy + starty, (fieldx * 2) + startx, 'B');
-        //f[fieldy * gameW + fieldx].opened = 1;
-        //wrefresh(stdscr);
+        // mvwaddch(stdscr, fieldy + starty, (fieldx * 2) + startx, 'B');
+        // f[fieldy * gameW + fieldx].opened = 1;
+        // wrefresh(stdscr);
         return -1;
     }
 
@@ -133,7 +118,8 @@ int openField(int fieldy, int fieldx, fieldStruct *f, int gameH, int gameW, int 
     if (f[fieldy * gameW + fieldx].opened == 1) {
         if (chordOpen(fieldy, fieldx, f, gameH, gameW, starty, startx) == -1)
             return -1;
-        else return 0;
+        else
+            return 0;
     }
 
     // check possibility to open around
