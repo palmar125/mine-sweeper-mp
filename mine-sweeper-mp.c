@@ -12,9 +12,8 @@ typedef struct
     int opened;
 } fieldStruct;
 
-//function to open tiles
+// function to open tiles
 int openField(int fieldy, int fieldx, fieldStruct *f, int gameH, int gameW, int starty, int startx);
-
 
 // ASCI art from:
 // https://patorjk.com/software/taag/#p=display&h=1&v=1&f=Modular&t=%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20MINE%0ASWEEPER%0A%0A
@@ -60,9 +59,8 @@ int pointCheck(int fieldy, int fieldx, fieldStruct *f, int gameH, int gameW) {
     return bCount;
 }
 
-
 void writeNumber(int fieldy, int fieldx, fieldStruct *f, int gameH, int gameW, int starty, int startx, int p) {
-    gameW=gameW; //only to stop compiler error;
+    gameW = gameW;  // only to stop compiler error;
     f[(fieldy)*gameH + fieldx].opened = 1;
     char num[5];
     sprintf(num, "%d", p);
@@ -87,27 +85,30 @@ int chordOpen(int fieldy, int fieldx, fieldStruct *f, int gameH, int gameW, int 
             }
         }
     }
-    // second, open now
+    // second, open up chord
     int p;
     for (int i = 0; i < 9; i++) {
         if (i != 4) { /*omit checked point*/
             y = i / 3 - 1;
             x = i % 3 - 1;
-            if (fieldy + y < gameH && fieldy + y >= 0 && fieldx + x >= 0 && fieldx + x < gameW) {
-                p = pointCheck(fieldy + y, fieldx + x, f, gameH, gameW);
+            if (fieldy + y < gameH && fieldy + y >= 0 && fieldx + x >= 0 && fieldx + x < gameW) {                
                 if (f[(fieldy + y) * gameH + fieldx + x].flag != 1 && f[(fieldy + y) * gameH + fieldx + x].opened != 1) {
-                    if (p > 0)
-                        writeNumber(fieldy + y, fieldx + x, f, gameW, gameH, starty, startx, p);
-                    else {
+                    // that check is not nessesery. openField do the same
+                    // p = pointCheck(fieldy + y, fieldx + x, f, gameH, gameW);
+                    // if (p > 0)
+                    //     writeNumber(fieldy + y, fieldx + x, f, gameW, gameH, starty, startx, p);
+                    // else 
+                    { //remove after test
                         // no bombs around
-                        f[fieldy+y * gameW + fieldx+x].opened = 1;
-                        attrset(COLOR_PAIR(1));
-                        mvwaddch(stdscr, fieldy+y + starty, ((fieldx+x) * 2) + startx, '.');
-                        attrset(A_NORMAL);
-                        wrefresh(stdscr);
-                        //open wider
+                        // that code is not needed, because openField do the same
+                        // f[fieldy + y * gameW + fieldx + x].opened = 1;
+                        // attrset(COLOR_PAIR(1));
+                        // mvwaddch(stdscr, fieldy + y + starty, ((fieldx + x) * 2) + startx, '.');
+                        // attrset(A_NORMAL);
+                        // wrefresh(stdscr);
+                        // open wider
                         openField(fieldy + y, fieldx + x, f, gameH, gameW, starty, startx);
-                    }
+                    } //remove after test
                 }
             }
         }
@@ -121,9 +122,9 @@ int openField(int fieldy, int fieldx, fieldStruct *f, int gameH, int gameW, int 
 
     // you press a bomb
     if (f[fieldy * gameW + fieldx].bomb == 1) {
-        mvwaddch(stdscr, fieldy + starty, (fieldx * 2) + startx, 'B');
-        f[fieldy * gameW + fieldx].opened = 1;
-        wrefresh(stdscr);
+        //mvwaddch(stdscr, fieldy + starty, (fieldx * 2) + startx, 'B');
+        //f[fieldy * gameW + fieldx].opened = 1;
+        //wrefresh(stdscr);
         return -1;
     }
 
@@ -132,6 +133,7 @@ int openField(int fieldy, int fieldx, fieldStruct *f, int gameH, int gameW, int 
     if (f[fieldy * gameW + fieldx].opened == 1) {
         if (chordOpen(fieldy, fieldx, f, gameH, gameW, starty, startx) == -1)
             return -1;
+        else return 0;
     }
 
     // check possibility to open around
@@ -302,12 +304,12 @@ void showEndResult(WINDOW *winResult, WINDOW *winStatus, fieldStruct *field, pth
     delwin(w);
 }
 void showStatus(WINDOW *winStatus, int fieldy, int fieldx, fieldStruct *field, int gameH, int gameW, int move) {
-        mvwprintw(winStatus, 0, 1, "F: %d, O: %d", flagCount(field, gameH, gameW), openedCount(field, gameH, gameW));
-        mvwprintw(winStatus, 1, 1, "M: %d", move);
-        mvwprintw(winStatus, 2, 1, "Y: %d, X: %d  ", fieldy, fieldx);
-        mvwprintw(winStatus, 3, 1, "Time: %d", clockTime);
-        wrefresh(winStatus);
-        wrefresh(stdscr);
+    mvwprintw(winStatus, 0, 1, "F: %d, O: %d", flagCount(field, gameH, gameW), openedCount(field, gameH, gameW));
+    mvwprintw(winStatus, 1, 1, "M: %d", move);
+    mvwprintw(winStatus, 2, 1, "Y: %d, X: %d  ", fieldy, fieldx);
+    mvwprintw(winStatus, 3, 1, "Time: %d", clockTime);
+    wrefresh(winStatus);
+    wrefresh(stdscr);
 }
 
 int minePlay(int gameH, int gameW, int bombCount) {
@@ -412,7 +414,7 @@ int minePlay(int gameH, int gameW, int bombCount) {
                     wmove(stdscr, getcury(stdscr), getcurx(stdscr) - 1);
                     if (checkResult(field, gameH, gameW, bombCount) == 1) {
                         curs_set(0);
-                        showStatus(winStatus, fieldy, fieldx, field,  gameH,  gameW, move);
+                        showStatus(winStatus, fieldy, fieldx, field, gameH, gameW, move);
                         showEndResult(winResult, winStatus, field, clockPtr, 1);
                         return (1);
                     }
@@ -441,7 +443,7 @@ int minePlay(int gameH, int gameW, int bombCount) {
                         wmove(stdscr, starty + fieldy, startx + fieldx * 2);
                         if (checkResult(field, gameH, gameW, bombCount) == 1) {
                             curs_set(0);
-                            showStatus(winStatus, fieldy, fieldx, field,  gameH,  gameW, move);
+                            showStatus(winStatus, fieldy, fieldx, field, gameH, gameW, move);
                             showEndResult(winResult, winStatus, field, clockPtr, 1);
 
                             return (1);
@@ -450,7 +452,7 @@ int minePlay(int gameH, int gameW, int bombCount) {
                         showBombs(field, gameH, gameW, starty, startx);
                         wmove(stdscr, starty + fieldy, startx + fieldx * 2);
                         // You pressed a mine
-                        showStatus(winStatus, fieldy, fieldx, field,  gameH,  gameW, move);
+                        showStatus(winStatus, fieldy, fieldx, field, gameH, gameW, move);
                         showEndResult(winResult, winStatus, field, clockPtr, 0);
 
                         return (-1);
@@ -472,9 +474,8 @@ int minePlay(int gameH, int gameW, int bombCount) {
             default:
                 break;
         }
-        
-        showStatus(winStatus, fieldy, fieldx, field,  gameH,  gameW, move);
 
+        showStatus(winStatus, fieldy, fieldx, field, gameH, gameW, move);
     }
     return 0;
 }
